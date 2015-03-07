@@ -1,0 +1,2 @@
+legsJump = 0 21 84 20
+legsWalking = 0 0 337 20

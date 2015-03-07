@@ -1,0 +1,5 @@
+idol = 0 57 42 56
+jump1 = 43 57 42 56
+jump2 = 86 57 42 56
+PlayerStatic = 129 57 42 56
+walksheet = 0 0 336 56

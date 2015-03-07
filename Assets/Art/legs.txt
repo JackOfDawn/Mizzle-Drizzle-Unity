@@ -1,0 +1,2 @@
+bodyjumping = 0 36 126 35
+bodyWalking = 0 0 337 35
