@@ -3,6 +3,13 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
+    enum DashType
+    {
+        StandardDash = 1,
+        QJetDash = 2,
+        MixDash
+    }
+
     public float maxSpeed = 10f;
     public float jumpForce = 700;
     bool facingRight = true;
@@ -16,7 +23,11 @@ public class PlayerController : MonoBehaviour {
     //controls
     float move = 0;
     float aim = 0;
-    
+
+    //Dashing
+    public DashType dashType = DashType.StandardDash;
+    bool _oldDashPressed = false;
+    bool _isDashing = false;
 
     //Falling shizzles
     bool grounded = false;
@@ -43,10 +54,12 @@ public class PlayerController : MonoBehaviour {
         legAnim.SetFloat("vSpeed", rigid2D.velocity.y);
 
         //controlMovement
+        if (!_isDashing)
+        {
+            legAnim.SetFloat("Speed", Mathf.Abs(move));
 
-        legAnim.SetFloat("Speed", Mathf.Abs(move));
-
-        rigid2D.velocity = new Vector2(move * maxSpeed, rigid2D.velocity.y);
+            rigid2D.velocity = new Vector2(move * maxSpeed, rigid2D.velocity.y);
+        }
 
         if (move > 0 && !facingRight)
             Flip();
@@ -70,12 +83,33 @@ public class PlayerController : MonoBehaviour {
         aim = Input.GetAxis("Vertical");
         bodyAnim.SetFloat("vAim", aim);
 
-
         if (Input.GetKeyDown(KeyCode.X))
         {
             bodyAnim.SetTrigger("Fire");
         }
+
+        //Dashing
+        bool newDashPressed = Input.GetKeyDown(KeyCode.Z);
+        if(newDashPressed && !_oldDashPressed)
+        {
+            _isDashing = true;
+            switch(dashType)
+            {
+                case DashType.StandardDash:
+                    HandleStandardDash();
+                    break;
+            }
+        }
+            _oldDashPressed = newDashPressed;
+        
     }
+
+    void HandleStandardDash()
+    {
+
+    }
+
+    
 
     void Flip()
     {
