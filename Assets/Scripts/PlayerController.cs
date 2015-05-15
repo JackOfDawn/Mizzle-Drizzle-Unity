@@ -3,7 +3,7 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
-    enum DashType
+    public enum DashType
     {
         StandardDash = 1,
         QJetDash = 2,
@@ -28,12 +28,15 @@ public class PlayerController : MonoBehaviour {
     public DashType dashType = DashType.StandardDash;
     bool _oldDashPressed = false;
     bool _isDashing = false;
+    Vector2 _dashDirection;
 
     //Falling shizzles
     bool grounded = false;
     public Transform groundCheck;
     public float groundRadius = 0.2f;
     public LayerMask whatIsGround;
+
+    float gravityScale;
 
 	// Use this for initialization
 	void Start () {
@@ -43,6 +46,7 @@ public class PlayerController : MonoBehaviour {
             bodyAnim = transform.FindChild("Body").GetComponent<Animator>();
         if (rigid2D == null)
             rigid2D = gameObject.GetComponent<Rigidbody2D>();
+        gravityScale = rigid2D.gravityScale;
 
 	}
 	
@@ -82,7 +86,10 @@ public class PlayerController : MonoBehaviour {
         move = Input.GetAxis("Horizontal");
         aim = Input.GetAxis("Vertical");
         bodyAnim.SetFloat("vAim", aim);
+        _dashDirection.x = move;
+        _dashDirection.y = aim;
 
+        //Firing
         if (Input.GetKeyDown(KeyCode.X))
         {
             bodyAnim.SetTrigger("Fire");
@@ -104,12 +111,45 @@ public class PlayerController : MonoBehaviour {
         
     }
 
+    #region StandardDash
+    public float dashSeconds;
+    public float dashPower;
+    public float dashDistance;
     void HandleStandardDash()
     {
-
+        StopCoroutine("StandardDashing");
+        StartCoroutine("StandardDashing");
     }
+     
+    IEnumerator StandardDashing()
+    {
+        _isDashing = true;
+        _dashDirection.Normalize();
+        Vector3 destination = transform.position + (Vector3)(_dashDirection * dashDistance);
+        Vector3 startPos = transform.position;
+        startPos.z = 0;
 
-    
+        float t = dashSeconds;
+        rigid2D.gravityScale = 0;
+        while(t > 0)
+        {
+            //startPos = transform.position;
+            t -= Time.deltaTime;
+            Vector3 newPos = Vector3.Lerp(transform.position, destination, Time.deltaTime * dashPower);
+            //Debug.Log("newPos:" + newPos + ", StartPos: " + startPos);
+            //rigid2D.velocity = (Vector2)(newPos - transform.position) * dashPower;
+            rigid2D.MovePosition(newPos);
+
+            //Debug.Log(rigid2D.velocity);
+            
+            rigid2D.velocity = Vector3.zero;
+            yield return null;
+        }
+        rigid2D.gravityScale = gravityScale; 
+        _isDashing = false;
+    }
+    #endregion
+
 
     void Flip()
     {
